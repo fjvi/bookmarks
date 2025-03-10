@@ -14,16 +14,17 @@
 	<div class="opened-for-codepen">
 		<h2>常用</h2>
 		<div style="display: show">
-			<h3>收藏</h3>
+		    <h3>代码</h3>
+	   	    <div class="menu" style="display: none">
+                <span onclick="copy(event)">preview</span>
+                <span onclick="copy(event)">mobilebasic</span>
+                <span onclick="copy(event)">ipconfig /flushdns</span>
+			</div>
+			<h4>收藏</h4>
 			<div style="display: none">
 				<a href="https://github.com/fjvi/sq/edit/main/index.html">bookmarks编辑</a>
 				<a href="https://github.dev/fjvi/sq/tree/main">sq 编辑</a>
-			</div>
-		    <h4>剪切板</h4>
-	   	    <div style="display: none">
-                <span onclick="copy(event)">preview</span>
-                <span onclick="copy(event)">mobilebasic</span>
-			    <h5></h5>
+				<h5></h5>
 		    </div>
 			<a href="https://www.google.com/ncr">🔎 Google</a>
 			<a href="https://www.youtube.com/">🔴 YouTube</a>
@@ -482,9 +483,13 @@
             font-size: 1.3rem;
             color: #b94152;
         }
-        .accordion span { 		
-            display: block;
-            padding: 8px 30px;
+        .menu {
+            width: 680px;
+            margin: 0 auto;
+        }
+        .accordion span {
+            line-height: 40px;
+            padding: 5px 10px;
             text-decoration: none;
             color: #333;
             background-color: #fff;
@@ -492,9 +497,19 @@
             border-radius: 5px;
             transition: background-color 0.3s ease;
         }
-        .accordion span:hover {            
-            background-color: #99d3fd;
+        .accordion span:hover {
             color: green;
+        }
+        .accordion span:hover::after {
+            content: "复制";
+            font-size: 0.8rem;
+            color: red;
+            border: 1px solid #ccc;
+            padding: 2px;
+            border-radius: 5px;
+        }
+        .accordion span:active {            
+            background-color: red;
         }
 </style>
 
