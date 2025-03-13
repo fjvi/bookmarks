@@ -14,13 +14,7 @@
 	<div class="opened-for-codepen">
 		<h2>常用</h2>
 		<div style="display: show">
-		    <h3>代码</h3>
-	   	    <div class="menu" style="display: none">
-                <span onclick="copy(event)">preview</span>
-                <span onclick="copy(event)">mobilebasic</span>
-                <span onclick="copy(event)">ipconfig /flushdns</span>
-			</div>
-			<h4>收藏</h4>
+			<h3>收藏</h3>
 			<div style="display: none">
 				<a href="https://github.com/fjvi/sq/edit/main/index.html">bookmarks编辑</a>
 				<a href="https://github.dev/fjvi/sq/tree/main">sq 编辑</a>
@@ -30,14 +24,14 @@
 			<a href="https://www.youtube.com/">🔴 YouTube</a>
 			<a href="https://www.bing.com/?setmkt=en-US&setlang=en-US">🅱️ bing</a>
 			<a href="https://www.baidu.com/">🔎 百度</a>
-            <a href="https://fjvi.github.io/note/">📒  MGT note</a>
+            <a href="https://fjvi.github.io/note/index.html">📒  MGT note</a>
             <a href="https://github.com/fjvi/note/issues/new/choose">✍️  新建笔记@note</a>
 			<a href="https://github.com/">😺 GitHub</a>
 			<a href="https://dash.cloudflare.com/login?lang=zh-Hans-CN">🌩️ cloudflare</a>
 			<a href="https://chat.deepseek.com/">🐋 DeepSeek</a>
 			<a href="https://chatgpt.com/">֎ ChatGPT</a>
 			<a href="https://test.aypwip.org/webnote/wodewangluobianqianziliudi">🟨 便签</a>
-			<a href="https://gist.github.com/fjvi/">📑 Gists</a></div>
+			<a href="https://gist.github.com/fjvi/">🧾 Gists</a></div>
 		<h2>Google</h2>
 		<div style="display: none">
 			<h3>Google新建 +</h3>
@@ -148,16 +142,23 @@
 			<a href="https://www.youtube.com/@clplus/videos">冲浪普拉斯</a></div>
 		<h2>GitHub</h2>
 		<div style="display: none">
-			<h3>仓库</h3>
+			<h3>我的仓库</h3>
 			<div style="display: none">
                 <a href="https://github.com/fjvi/sq" >sq</a>
                 <a href="https://github.com/fjvi/note" >note</a>
+                <a href="https://github.com/fjvi/Gmeek" >Gmeek</a>
                 <a href="https://github.com/fjvi/wiki" >wiki</a>
                 <a href="https://github.com/fjvi/code" >code</a>
+			</div>
+			<h3>收藏项目</h3>
+			<div style="display: none">
+                <a href="https://github.com/yonggekkk/Cloudflare_vless_trojan" >甬哥侃侃侃/Cf-workers</a>
+                <a href="https://github.com/hst1189/hst1189.github.io" >❤️小饅頭の部落格❤️</a>
+                <a href="https://github.com/Meekdai/Gmeek/issues" >Gmeek</a>
 				<h5></h5>
 			</div>
-            <a href="https://github.com/fjvi?tab=repositories" >仓库</a>
-            <a href="https://fjvi.github.io/note/">MGT note</a>
+            <a href="https://github.com/fjvi?tab=repositories" >😺 fjvi@GitHub</a>
+            <a href="https://github.com/fjvi/note/" >😺 fjvi/note</a>
             <a href="https://github.com/fjvi/note/issues/new/choose" >✍️新建笔记@note</a>
             <a href="https://gist.github.com/fjvi" >Gist</a>
             <a href="https://github.com/explore">GitHub探索</a>
@@ -315,7 +316,7 @@
 				<a href="https://ygkkk.blogspot.com/">甬哥侃侃侃</a>
 				<h5></h5>
 			</div>
-			<a href="https://fjvi.github.io/note/">note@fjvi</a>
+            <a href="https://fjvi.github.io/note/">📒 MGTnote.io</a>
 			<a href="https://mgtang.blogspot.com/">麦谷堂@blogger</a>
 			<a href="https://6889692.blogspot.com/">6889692@blogger</a>
 			<a href="https://xywh.wordpress.com/">WordPress-校园文化建设</a>
@@ -357,11 +358,18 @@
 	</div>
 	<h1>Updates</h1>
 	<div style="display: none">
+		    <h3>文本复制</h3>
+	   	    <div class="menu" style="display: none">
+                <span onclick="copy(event)">preview</span>
+                <span onclick="copy(event)">mobilebasic</span>
+                <span onclick="copy(event)">ipconfig /flushdns</span>
+				<h5></h5>
+			</div>
 		<a href="https://github.com/fjvi/sq/edit/main/index.html">bookmarks编辑</a>
 		<a href="https://github.dev/fjvi/sq/tree/main">sq 编辑</a>
 	</div>
 </aside>
-<script>
+<script>// 手风琴菜单功能
   const headers = ["H1", "H2", "H3", "H4", "H5", "H6"];
 
   document.querySelector(".accordion").addEventListener("click", function(e) {
@@ -370,48 +378,44 @@
 
     if (headers.includes(name)) {
       const subItem = target.nextElementSibling;
-
-      // Calculate depth of the clicked element
       let depth = 0, parent = subItem.parentElement;
       while (parent !== this) { depth++; parent = parent.parentElement; }
-
-      // Hide elements at or deeper than the clicked element's depth
       Array.from(this.querySelectorAll(".accordion p, .accordion div")).forEach(el => {
         let elDepth = 0, elParent = el.parentElement;
         while (elParent !== this) { elDepth++; elParent = elParent.parentElement; }
         if (elDepth >= depth && el !== subItem) el.style.display = "none";
       });
-
-      // Toggle visibility and adjust border radius
       subItem.style.display = (subItem.style.display === "block") ? "none" : "block";
       if (subItem.style.display === "block") {
         const visibleElements = Array.from(this.querySelectorAll(".accordion :visible"));
         if (visibleElements.length) visibleElements[visibleElements.length - 1].style.borderRadius = "0 0 10px 10px";
       }
-
-      // Adjust target's bottom border radius
       target.style.borderBottomRightRadius = target.style.borderBottomLeftRadius = "0";
     }
   });
 </script>
 	
-<script>
+<script>// 点击复制功能
     copy = (event) => {
     let innerText = event.target.innerText;
     var tmpInput = document.createElement("input");
     document.body.appendChild(tmpInput);
     tmpInput.value = innerText;
     tmpInput.select();
-    document.execCommand("cut"); // copy
+    document.execCommand("cut"); 
     tmpInput.remove();
     }
 </script>
+		
 <style>
+       
         * { margin: 0; padding: 0; }
-        body { font-size: 100%; }
+        body{font-size: 100%;
+			}
         .accordion {
             width: 720px;
             margin: 0 auto;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         .accordion h1, h2, h3, h4 {
             cursor: pointer;
@@ -498,18 +502,31 @@
             transition: background-color 0.3s ease;
         }
         .accordion span:hover {
-            color: green;
+            background-color: #99d3fd;
         }
         .accordion span:hover::after {
-            content: "复制";
-            font-size: 0.8rem;
-            color: red;
+            content: "⿻";
+            font-size: 1rem;
+            color: #b94152;
+            background-color: #fff;
             border: 1px solid #ccc;
-            padding: 2px;
+            padding: 2px 6px;
+            margin-left: 4px;
             border-radius: 5px;
         }
-        .accordion span:active {            
+        .accordion span:active {
             background-color: red;
+        }
+        .accordion span:active:after {
+            content: "✔";
+        }
+		.giscus {
+            width: 720px;
+            margin: 0 auto;
+        }
+		.giscus-frame {
+            width: 720px; height:480px;
+            margin: 0 auto;
         }
 </style>
 
