@@ -320,11 +320,12 @@
 			</div>
 			<h3>电子书</h3>
 			<div>
+			    <a href="https://zh.z-library.sk/">Z-Library图书馆</a>
 			    <a href="https://www.8bei8.com/">太极书馆</a>
 				<a href="https://iui.su/3454/"> 不死鸟 - 分享为王官网</a>
 				<a href="https://jc.pep.com.cn/">中小学教材电子版</a>
 			</div>
-			<h4>软件</h4>
+			<h4>设计</h4>
 			<div>
 				<a href="http://archgo.cn/">archgo.cn - SketchUp模型下载</a>
 				<a href="https://3dwarehouse.sketchup.com/">3dwarehouse/</a>
@@ -483,7 +484,7 @@
             color: #b94152;
         }
         .accordion h3 {
-            padding: 8px 50px;
+            padding: 8px 52px;
             background-color: #b94152;
             font-size: 1rem;
             border-bottom: 1px solid #ddd;
@@ -494,7 +495,7 @@
             color: #b94152;
         }
         .accordion h4 {
-            padding: 8px 50px;
+            padding: 8px 52px;
             background-color: #ffc25a;
             font-size: 1rem;
             border-bottom: 1px solid #ddd;
@@ -510,7 +511,7 @@
         }
         .accordion a {
             display: block;
-            padding: 8px 30px;
+            padding: 8px 70px;
             text-decoration: none;
             color: #333;
             background-color: #f8f8f8;
@@ -528,7 +529,7 @@
             margin: 0 auto;
         }
         .accordion span {
-            line-height: 40px;
+            line-height: 20px;
             padding: 5px 10px;
             text-decoration: none;
             color: #333;
@@ -536,6 +537,11 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             transition: background-color 0.3s ease;
+			
+            display: inline-block;  /*将span当做块级元素对待*/
+			white-space: nowrap;  /*强制span不换行*/
+            width: 100px;  /*限制宽度*/
+            overflow: hidden;  /*超出宽度部分隐藏*/
         }
         .accordion span:hover {
             background-color: #99d3fd;
@@ -547,8 +553,8 @@
             background-color: #fff;
             border: 1px solid #ccc;
             padding: 2px 6px;
-            margin-left: 4px;
-            border-radius: 5px;
+			margin-left: 4px;		
+            border-radius: 5px;	
         }
         .accordion span:active {
             background-color: red;
