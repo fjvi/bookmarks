@@ -631,77 +631,33 @@
 </script>	
 <script>// 加速title显示
 (function() {
-    // 创建并缓存提示元素
-    const tip = document.createElement("div");
-    tip.id = "tip-div";
-    Object.assign(tip.style, {
-        display: "none",
-        color: "#000",
-        backgroundColor: "#f3f3f3",
-        border: "1px solid #cccccc",
-        fontSize: "12px",
-        padding: "5px",
-        lineHeight: "16px",
-        position: "absolute",
-        left: "0",
-        top: "0",
-        zIndex: "2000",
-        pointerEvents: "none", // 防止提示框干扰鼠标事件
-        boxShadow: "2px 2px 5px rgba(0,0,0,0.1)", // 添加阴影提升视觉效果
-        borderRadius: "3px", // 圆角边框
-        maxWidth: "300px", // 限制最大宽度
-        wordWrap: "break-word" // 自动换行
+    const tip = Object.assign(document.createElement('div'), {
+        id: 'tip-div',
+        style: `display:none;color:#000;background:#f3f3f3;border:1px solid #ccc;
+                font:12px/16px sans-serif;padding:5px;position:absolute;
+                z-index:2000;pointer-events:none;max-width:300px;`
     });
     document.body.appendChild(tip);
 
-    // 使用事件委托提高性能
-    document.addEventListener('mousemove', function(e) {
-        const target = e.target;
-        const title = target.getAttribute("title") || target.getAttribute("_title");
+    document.onmousemove = e => {
+        const t = e.target;
+        const title = t.title || t.getAttribute('_title');
         
-        // 如果没有title或与上次相同，则隐藏或保持不变
-        if (!title) {
-            tip.style.display = "none";
-            return;
+        if (!title) return tip.style.display = 'none';
+        
+        if (t.title) {
+            t.setAttribute('_title', t.title);
+            t.removeAttribute('title');
         }
         
-        // 如果title属性存在，转移到_title属性
-        if (target.hasAttribute("title")) {
-            target.removeAttribute("title");
-            target.setAttribute("_title", title);
-        }
+        if (tip.textContent !== title) tip.textContent = title;
         
-        // 更新内容
-        if (tip.textContent !== title) {
-            tip.textContent = title;
-        }
-        
-        // 显示并定位
-        tip.style.display = "block";
-        
-        const scrollX = window.scrollX || document.documentElement.scrollLeft;
-        const scrollY = window.scrollY || document.documentElement.scrollTop;
-        
-        let left = scrollX + e.clientX + 10;
-        let top = scrollY + e.clientY + 10;
-        
-        // 确保提示框不会超出视口
-        const tipWidth = tip.offsetWidth;
-        const tipHeight = tip.offsetHeight;
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-        
-        if (left + tipWidth > windowWidth) {
-            left = Math.max(0, windowWidth - tipWidth - 5);
-        }
-        
-        if (top + tipHeight > windowHeight) {
-            top = Math.max(0, windowHeight - tipHeight - 5);
-        }
-        
-        tip.style.left = `${left}px`;
-        tip.style.top = `${top}px`;
-    });
+        tip.style.display = 'block';
+        const x = Math.min(e.pageX + 10, innerWidth - tip.offsetWidth - 5);
+        const y = Math.min(e.pageY + 10, innerHeight - tip.offsetHeight - 5);
+        tip.style.left = x + 'px';
+        tip.style.top = y + 'px';
+    };
 })();
 </script>
 <style>
