@@ -10,14 +10,10 @@
   
 <body>
 <aside class="accordion">
-	<div class="menu-header">
-  <h1>Bookmarks</h1>
-  <button onclick="toggleEdit()" id="editBtn" >✏️ 编辑</button>
-</div>
-
-	<div class="opened-for-codepen" id="common-bookmarks">
+	<h1>Bookmarks</h1>
+	<div class="opened-for-codepen">
 		<h2>常用</h2>
-		<div style="display: block;"> <!-- 始终展开 -->
+		<div style="display: show">
 			<h3>收藏</h3>
 			<div style="display: none">
 				<a href="https://clip.692.cloudns.be/">⿻ Clip剪贴板</a>
@@ -596,171 +592,75 @@
 		<a href="https://github.com/fjvi/sq/edit/main/index.html">sq_编辑</a>
 		<a href="https://github.dev/fjvi/sq/tree/main">sq_编辑 2</a>
 	</div>
-    <div id="linkEditor" style="display:none; position:fixed; top:30%; left:50%; transform:translateX(-50%);
-     background:#fff; padding:20px; border:1px solid #ccc; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:3000;">
-        <h3>编辑超链接</h3>
-        <label>文字：<input type="text" id="linkText" style="width: 300px;"></label><br><br>
-        <label>地址：<input type="text" id="linkHref" style="width: 300px;"></label><br><br>
-        <button onclick="applyLinkEdit()">保存</button>
-        <button onclick="cancelLinkEdit()">取消</button>
-    </div>
 </aside>
+<script>// 手风琴菜单功能
+  const headers = ["H1", "H2", "H3", "H4", "H5", "H6"];
 
-<script>
-// ✏️ 切换编辑模式
-function toggleEdit() {
-  const body = document.body;
-  const btn = document.getElementById("editBtn");
-  const isEditable = body.getAttribute("contenteditable") === "true";
+  document.querySelector(".accordion").addEventListener("click", function(e) {
+    const target = e.target,
+          name = target.nodeName.toUpperCase();
 
-  if (isEditable) {
-    // 关闭编辑并保存
-    body.removeAttribute("contenteditable");
-    btn.textContent = "✏️ 编辑";
-    saveContent(); // 自动触发保存
-  } else {
-    // 开启编辑
-    body.setAttribute("contenteditable", "true");
-    btn.textContent = "✅ 完成";
-  }
-}
-
-function saveContent() {
-  // 获取页面内容并保存
-  const content = document.documentElement.outerHTML;
-  
-  // 保持常用菜单始终展开
-  const commonBookmarks = document.getElementById("common-bookmarks");
-  const commonBookmarksStatus = commonBookmarks.style.display;
-  
-  // 记录常用菜单状态，并保存
-  localStorage.setItem("commonBookmarksStatus", commonBookmarksStatus);
-
-  const blob = new Blob([content], { type: "text/html" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "bookmarks.html"; // 可根据需要改名
-  a.click();
-}
-
-// 加载保存状态
-document.addEventListener("DOMContentLoaded", function () {
-  const savedCommonBookmarksStatus = localStorage.getItem("commonBookmarksStatus");
-  if (savedCommonBookmarksStatus === "block") {
-    document.getElementById("common-bookmarks").style.display = "block";
-  }
-});
-
-// 编辑超链接功能
-let currentLink = null;
-
-document.addEventListener('dblclick', function (e) {
-  if (e.target.tagName === 'A' && document.body.getAttribute("contenteditable") === "true") {
-    e.preventDefault();
-    currentLink = e.target;
-    document.getElementById("linkText").value = currentLink.textContent;
-    document.getElementById("linkHref").value = currentLink.getAttribute("href");
-    document.getElementById("linkEditor").style.display = "block";
-  }
-});
-
-function applyLinkEdit() {
-  if (!currentLink) return;
-  currentLink.textContent = document.getElementById("linkText").value;
-  currentLink.setAttribute("href", document.getElementById("linkHref").value);
-  document.getElementById("linkEditor").style.display = "none";
-  currentLink = null;
-}
-
-function cancelLinkEdit() {
-  document.getElementById("linkEditor").style.display = "none";
-  currentLink = null;
-}
-
-// 📋 编辑模式下只复制纯文本
-document.addEventListener('copy', function (e) {
-  if (document.body.getAttribute("contenteditable") === "true") {
-    e.preventDefault();
-    const selection = window.getSelection();
-    const text = selection.toString();
-    e.clipboardData.setData('text/plain', text);
-  }
-});
-</script>
-
-<script>
-// 手风琴菜单功能
-const headers = ["H1", "H2", "H3", "H4", "H5", "H6"];
-
-document.querySelector(".accordion").addEventListener("click", function(e) {
-  const target = e.target,
-        name = target.nodeName.toUpperCase();
-
-  if (headers.includes(name)) {
-    const subItem = target.nextElementSibling;
-    let depth = 0, parent = subItem.parentElement;
-    while (parent !== this) { depth++; parent = parent.parentElement; }
-    Array.from(this.querySelectorAll(".accordion p, .accordion div")).forEach(el => {
-      let elDepth = 0, elParent = el.parentElement;
-      while (elParent !== this) { elDepth++; elParent = elParent.parentElement; }
-      if (elDepth >= depth && el !== subItem) el.style.display = "none";
-    });
-    subItem.style.display = (subItem.style.display === "block") ? "none" : "block";
-    if (subItem.style.display === "block") {
-      const visibleElements = Array.from(this.querySelectorAll(".accordion :visible"));
-      if (visibleElements.length) visibleElements[visibleElements.length - 1].style.borderRadius = "0 0 10px 10px";
-    }
-    target.style.borderBottomRightRadius = target.style.borderBottomLeftRadius = "0";
-  }
-});
-</script>
-
-<script>
-// 点击复制功能
-copy = (event) => {
-  let innerText = event.target.innerText;
-  var tmpInput = document.createElement("input");
-  document.body.appendChild(tmpInput);
-  tmpInput.value = innerText;
-  tmpInput.select();
-  document.execCommand("cut"); 
-  tmpInput.remove();
-}
-</script>
-  
-<script>
-// 加速title显示
-(function() {
-  const tip = Object.assign(document.createElement('div'), {
-      id: 'tip-div',
-      style: `display:none;color:#000;background:#f3f3f3;border:1px solid #ccc;
-              font:12px/16px sans-serif;padding:5px;position:absolute;
-              z-index:2000;pointer-events:none;max-width:300px;`
-  });
-  document.body.appendChild(tip);
-
-  document.onmousemove = e => {
-      const t = e.target;
-      const title = t.title || t.getAttribute('_title');
-
-      if (!title) return tip.style.display = 'none';
-
-      if (t.title) {
-          t.setAttribute('_title', t.title);
-          t.removeAttribute('title');
+    if (headers.includes(name)) {
+      const subItem = target.nextElementSibling;
+      let depth = 0, parent = subItem.parentElement;
+      while (parent !== this) { depth++; parent = parent.parentElement; }
+      Array.from(this.querySelectorAll(".accordion p, .accordion div")).forEach(el => {
+        let elDepth = 0, elParent = el.parentElement;
+        while (elParent !== this) { elDepth++; elParent = elParent.parentElement; }
+        if (elDepth >= depth && el !== subItem) el.style.display = "none";
+      });
+      subItem.style.display = (subItem.style.display === "block") ? "none" : "block";
+      if (subItem.style.display === "block") {
+        const visibleElements = Array.from(this.querySelectorAll(".accordion :visible"));
+        if (visibleElements.length) visibleElements[visibleElements.length - 1].style.borderRadius = "0 0 10px 10px";
       }
+      target.style.borderBottomRightRadius = target.style.borderBottomLeftRadius = "0";
+    }
+  });
+</script>
+	
+<script>// 点击复制功能
+    copy = (event) => {
+    let innerText = event.target.innerText;
+    var tmpInput = document.createElement("input");
+    document.body.appendChild(tmpInput);
+    tmpInput.value = innerText;
+    tmpInput.select();
+    document.execCommand("cut"); 
+    tmpInput.remove();
+    }
+</script>	
+<script>// 加速title显示
+(function() {
+    const tip = Object.assign(document.createElement('div'), {
+        id: 'tip-div',
+        style: `display:none;color:#000;background:#f3f3f3;border:1px solid #ccc;
+                font:12px/16px sans-serif;padding:5px;position:absolute;
+                z-index:2000;pointer-events:none;max-width:300px;`
+    });
+    document.body.appendChild(tip);
 
-      if (tip.textContent !== title) tip.textContent = title;
-
-      tip.style.display = 'block';
-      const x = Math.min(e.pageX + 10, innerWidth - tip.offsetWidth - 5);
-      const y = Math.min(e.pageY + 10, innerHeight - tip.offsetHeight - 5);
-      tip.style.left = x + 'px';
-      tip.style.top = y + 'px';
-  };
+    document.onmousemove = e => {
+        const t = e.target;
+        const title = t.title || t.getAttribute('_title');
+        
+        if (!title) return tip.style.display = 'none';
+        
+        if (t.title) {
+            t.setAttribute('_title', t.title);
+            t.removeAttribute('title');
+        }
+        
+        if (tip.textContent !== title) tip.textContent = title;
+        
+        tip.style.display = 'block';
+        const x = Math.min(e.pageX + 10, innerWidth - tip.offsetWidth - 5);
+        const y = Math.min(e.pageY + 10, innerHeight - tip.offsetHeight - 5);
+        tip.style.left = x + 'px';
+        tip.style.top = y + 'px';
+    };
 })();
 </script>
-
 <style>
        
         * {margin: 0;padding: 0;}
@@ -784,6 +684,7 @@ copy = (event) => {
             font-family: Lobster;
             font-size: 1.6rem;
             font-weight: normal;
+            border-bottom: 1px solid #ddd;
             color: #bbb;
         }
         .accordion h1:hover {
@@ -892,39 +793,8 @@ copy = (event) => {
 			margin-top: -3px;
             border-radius: 5px;	
 			position:absolute;
-        }	
-.menu-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0px;
-  background-color: #333;
-  color: #bbb;
-}
-
-.menu-header h1 {
-  font-family: Lobster;
-  font-size: 1.6rem;
-  font-weight: normal;
-  margin: 0;
-}
-
-.menu-header button {
-  font-size: 14px;
-  padding: 4px 10px;
-  margin-right: 30px;
-  color: #888;
-  background-color: #333;
-  border: 1px solid #444;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.menu-header button:hover {
-  background-color: #45a049;
-  color: white;
-}
-
-		
+        }		
 </style>
+
+</body>
 </html>
