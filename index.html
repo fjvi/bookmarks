@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
   
@@ -589,9 +590,34 @@
 	</div>
 	<h1>Updates</h1>
 	<div style="display: none">
+		<a href="javascript:(function(){
+ 		 document.body.setAttribute('contenteditable', 'true');
+ 		 alert('已开启网页编辑，编辑完成后按 Esc 保存！');
+ 		 document.onkeydown = function (e) {
+ 		   e = e || window.event;
+  		  if(e.keyCode === 27){
+  		    document.body.setAttribute('contenteditable', 'false');
+  		    const html = document.documentElement.outerHTML;
+   		   const blob = new Blob([html], {type: 'text/html'});
+   		   const link = document.createElement('a');
+   		   link.href = URL.createObjectURL(blob);
+   		   link.download = 'Bookmarks.html';
+  		    link.click();
+ 		     alert('已保存修改后的网页到本地！');
+ 		   }
+ 		 }
+		})();"  base target="_self">✏️ 编辑网页</a>
 		<a href="https://github.com/fjvi/sq/edit/main/index.html">sq_编辑</a>
 		<a href="https://github.dev/fjvi/sq/tree/main">sq_编辑 2</a>
 	</div>
+<div id="linkEditor" style="display:none; position:fixed; top:30%; left:50%; transform:translateX(-50%);
+background:#fff; padding:20px; border:1px solid #ccc; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:3000;">
+<h3>编辑超链接</h3>
+<label>文字：<input type="text" id="linkText" style="width: 300px;"></label><br><br>
+<label>地址：<input type="text" id="linkHref" style="width: 300px;"></label><br><br>
+<button onclick="applyLinkEdit()">保存</button>
+<button onclick="cancelLinkEdit()">取消</button>
+    </div>
 </aside>
 <script>// 手风琴菜单功能
   const headers = ["H1", "H2", "H3", "H4", "H5", "H6"];
@@ -630,6 +656,33 @@
     tmpInput.remove();
     }
 </script>	
+<script>// 编辑超链接功能
+let currentLink = null;
+
+document.addEventListener('dblclick', function (e) {
+  if (e.target.tagName === 'A' && document.body.getAttribute("contenteditable") === "true") {
+    e.preventDefault();
+    currentLink = e.target;
+    document.getElementById("linkText").value = currentLink.textContent;
+    document.getElementById("linkHref").value = currentLink.getAttribute("href");
+    document.getElementById("linkEditor").style.display = "block";
+  }
+});
+
+function applyLinkEdit() {
+  if (!currentLink) return;
+  currentLink.textContent = document.getElementById("linkText").value;
+  currentLink.setAttribute("href", document.getElementById("linkHref").value);
+  document.getElementById("linkEditor").style.display = "none";
+  currentLink = null;
+}
+
+function cancelLinkEdit() {
+  document.getElementById("linkEditor").style.display = "none";
+  currentLink = null;
+}
+
+</script>
 <script>// 加速title显示
 (function() {
     const tip = Object.assign(document.createElement('div'), {
