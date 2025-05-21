@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <base target="_blank">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+    <title>Bookmarks Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+<aside class="accordion">
+    <h1>Bookmarks Manager</h1>
+    <div class="opened-for-codepen">
+        <h2>常用</h2>
+        <div style="display: show">
+            <h3>收藏</h3>
+            <div style="display: none">
+                <a href="https://fjvi.github.io/sq/">⭐ Bookmarks</a>
+            </div>
+            <h4>文本复制</h4>
+            <div class="wenben" style="display: none">
+                <span onclick="copy(event)" title="重启资源管理器">taskkill /f /im explorer.exe & start explorer.exe</span>
+                <h5></h5>
+            </div>
+            <a href="https://www.google.com/ncr">🔎 Google</a>
+        </div>
+    </div>
+    <h1>Updates</h1>
+    <div style="display: none">
+        <a href="https://www.google.com/ncr">🔎 Google</a>
+    </div>
+    <h1>Updates</h1>
+    <div class="opened-for-codepen">
+        <h2>常用</h2>
+        <div style="display: show">
+            <h3>收藏</h3>
+            <div style="display: none">
+                <a href="https://fjvi.github.io/sq/">⭐ Bookmarks</a>
+            </div>
+            <h4>文本复制</h4>
+            <div class="wenben" style="display: none">
+                <span onclick="copy(event)" title="重启资源管理器">taskkill /f /im explorer.exe & start explorer.exe</span>
+                <h5></h5>
+            </div>
+            <a href="https://www.google.com/ncr">🔎 Google</a>
+        </div>
+    </div>
+</aside>
+
+<!-- 管理面板 -->
+<div class="h1">
+    <button id="toggle-management">管理面板</button>
+    <div class="management-content" style="display:none;">
+        <div class="management-section">
+            <h3>分类管理</h3>
+            <div>
+                <input type="text" id="new-category" placeholder="新分类名称">
+                <button id="add-category">添加分类</button>
+            </div>
+            <div>
+                <select id="category-list"></select>
+                <button id="remove-category">删除分类</button>
+            </div>
+        </div>
+        
+        <div class="management-section">
+            <h3>书签管理</h3>
+            <div>
+                <select id="bookmark-category"></select>
+                <input type="text" id="bookmark-name" placeholder="书签名称">
+                <input type="text" id="bookmark-url" placeholder="URL">
+                <button id="add-bookmark">添加书签</button>
+            </div>
+            <div>
+                <select id="edit-bookmark-list"></select>
+                <button id="edit-bookmark">编辑</button>
+                <button id="delete-bookmark">删除</button>
+            </div>
+        </div>
+        
+        <div class="management-section">
+            <h3>数据操作</h3>
+            <button id="export-data">导出数据</button>
+            <button id="import-data">导入数据</button>
+            <input type="file" id="file-input" style="display:none;">
+            <button id="save-changes">保存到GitHub</button>
+            <button id="load-from-github">从GitHub加载</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 数据模型
+let bookmarksData = {
+    "常用": {
+        "收藏": {
+            "links": [
+                {"name": "⭐ Bookmarks", "url": "https://fjvi.github.io/sq/"}
+            ],
+            "texts": []
+        },
+        "文本复制": {
+            "links": [],
+            "texts": [
+                {"content": "taskkill /f /im explorer.exe & start explorer.exe", "title": "重启资源管理器"}
+            ]
+        },
+        "links": [
+            {"name": "🔎 Google", "url": "https://www.google.com/ncr"}
+        ]
+    },
+    "Updates": {
+        "links": [
+            {"name": "🔎 Google", "url": "https://www.google.com/ncr"}
+        ]
+    }
+};
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 尝试从localStorage加载数据
+    const savedData = localStorage.getItem('bookmarksData');
+    if (savedData) {
+        bookmarksData = JSON.parse(savedData);
+    }
+    
+    renderBookmarks();
+    setupManagementPanel();
+});
+
+// 渲染书签
+function renderBookmarks() {
+    const accordion = document.querySelector('.accordion');
+    accordion.innerHTML = '<h1>Bookmarks Manager</h1>';
+    
+    for (const category in bookmarksData) {
+        const categoryDiv = document.createElement('div');
+        const categoryHeader = document.createElement('h2');
+        categoryHeader.textContent = category;
+        categoryHeader.style.cursor = 'pointer';
+        categoryDiv.appendChild(categoryHeader);
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.style.display = 'none';
+        
+        // 处理直接链接
+        if (bookmarksData[category].links) {
+            for (const link of bookmarksData[category].links) {
+                const a = document.createElement('a');
+                a.href = link.url;
+                a.textContent = link.name;
+                contentDiv.appendChild(a);
+            }
+        }
+        
+        // 处理子分类
+        for (const subcategory in bookmarksData[category]) {
+            if (subcategory !== 'links') {
+                const subHeader = document.createElement('h3');
+                subHeader.textContent = subcategory;
+                subHeader.style.cursor = 'pointer';
+                contentDiv.appendChild(subHeader);
+                
+                const subContent = document.createElement('div');
+                subContent.style.display = 'none';
+                
+                // 子分类中的链接
+                if (bookmarksData[category][subcategory].links) {
+                    for (const link of bookmarksData[category][subcategory].links) {
+                        const a = document.createElement('a');
+                        a.href = link.url;
+                        a.textContent = link.name;
+                        subContent.appendChild(a);
+                    }
+                }
+                
+                // 子分类中的文本
+                if (bookmarksData[category][subcategory].texts) {
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'wenben';
+                    textDiv.style.display = 'none';
+                    
+                    for (const text of bookmarksData[category][subcategory].texts) {
+                        const span = document.createElement('span');
+                        span.textContent = text.content;
+                        span.title = text.title;
+                        span.onclick = copy;
+                        textDiv.appendChild(span);
+                    }
+                    
+                    subContent.appendChild(textDiv);
+                }
+                
+                contentDiv.appendChild(subContent);
+            }
+        }
+        
+        categoryDiv.appendChild(contentDiv);
+        accordion.appendChild(categoryDiv);
+    }
+    
+    // 重新绑定手风琴事件
+    setupAccordion();
+}
+
+// 设置管理面板
+function setupManagementPanel() {
+    // 切换管理面板
+    document.getElementById('toggle-management').addEventListener('click', function() {
+        const content = document.querySelector('.management-content');
+        content.style.display = content.style.display === 'none' ? 'block' : 'none';
+    });
+    
+    // 填充分类下拉列表
+    updateCategoryDropdowns();
+    
+    // 添加分类
+    document.getElementById('add-category').addEventListener('click', function() {
+        const newCategory = document.getElementById('new-category').value.trim();
+        if (newCategory && !bookmarksData[newCategory]) {
+            bookmarksData[newCategory] = { links: [] };
+            document.getElementById('new-category').value = '';
+            updateCategoryDropdowns();
+            renderBookmarks();
+            saveToLocalStorage();
+            Swal.fire('成功', '分类已添加', 'success');
+        } else {
+            Swal.fire('错误', '分类名称不能为空或已存在', 'error');
+        }
+    });
+    
+    // 删除分类
+    document.getElementById('remove-category').addEventListener('click', function() {
+        const category = document.getElementById('category-list').value;
+        if (category && bookmarksData[category]) {
+            Swal.fire({
+                title: '确认删除?',
+                text: `确定要删除分类"${category}"吗?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '删除'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    delete bookmarksData[category];
+                    updateCategoryDropdowns();
+                    renderBookmarks();
+                    saveToLocalStorage();
+                    Swal.fire('删除成功', '分类已删除', 'success');
+                }
+            });
+        }
+    });
+    
+    // 添加书签
+    document.getElementById('add-bookmark').addEventListener('click', function() {
+        const category = document.getElementById('bookmark-category').value;
+        const name = document.getElementById('bookmark-name').value.trim();
+        const url = document.getElementById('bookmark-url').value.trim();
+        
+        if (!category || !name || !url) {
+            Swal.fire('错误', '请填写完整信息', 'error');
+            return;
+        }
+        
+        if (!bookmarksData[category]) {
+            bookmarksData[category] = { links: [] };
+        }
+        
+        // 简单验证URL
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            Swal.fire({
+                title: 'URL格式警告',
+                text: 'URL应该以http://或https://开头，是否继续?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '继续',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    addBookmark(category, name, url);
+                }
+            });
+        } else {
+            addBookmark(category, name, url);
+        }
+    });
+    
+    function addBookmark(category, name, url) {
+        if (!bookmarksData[category].links) {
+            bookmarksData[category].links = [];
+        }
+        
+        bookmarksData[category].links.push({ name, url });
+        document.getElementById('bookmark-name').value = '';
+        document.getElementById('bookmark-url').value = '';
+        updateBookmarkDropdowns();
+        renderBookmarks();
+        saveToLocalStorage();
+        Swal.fire('成功', '书签已添加', 'success');
+    }
+    
+    // 编辑书签
+    document.getElementById('edit-bookmark').addEventListener('click', function() {
+        const bookmarkPath = document.getElementById('edit-bookmark-list').value;
+        if (!bookmarkPath) return;
+        
+        const [category, subcategory, index] = bookmarkPath.split('|');
+        let bookmark;
+        
+        if (subcategory === 'root') {
+            bookmark = bookmarksData[category].links[index];
+        } else {
+            bookmark = bookmarksData[category][subcategory].links[index];
+        }
+        
+        Swal.fire({
+            title: '编辑书签',
+            html: `
+                <input id="swal-name" class="swal2-input" value="${bookmark.name}">
+                <input id="swal-url" class="swal2-input" value="${bookmark.url}">
+            `,
+            focusConfirm: false,
+            preConfirm: () => {
+                return {
+                    name: document.getElementById('swal-name').value,
+                    url: document.getElementById('swal-url').value
+                };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const { name, url } = result.value;
+                if (name && url) {
+                    if (subcategory === 'root') {
+                        bookmarksData[category].links[index] = { name, url };
+                    } else {
+                        bookmarksData[category][subcategory].links[index] = { name, url };
+                    }
+                    renderBookmarks();
+                    saveToLocalStorage();
+                    Swal.fire('成功', '书签已更新', 'success');
+                }
+            }
+        });
+    });
+    
+    // 删除书签
+    document.getElementById('delete-bookmark').addEventListener('click', function() {
+        const bookmarkPath = document.getElementById('edit-bookmark-list').value;
+        if (!bookmarkPath) return;
+        
+        const [category, subcategory, index] = bookmarkPath.split('|');
+        
+        Swal.fire({
+            title: '确认删除?',
+            text: '确定要删除这个书签吗?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: '删除'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (subcategory === 'root') {
+                    bookmarksData[category].links.splice(index, 1);
+                } else {
+                    bookmarksData[category][subcategory].links.splice(index, 1);
+                }
+                updateBookmarkDropdowns();
+                renderBookmarks();
+                saveToLocalStorage();
+                Swal.fire('删除成功', '书签已删除', 'success');
+            }
+        });
+    });
+    
+    // 导出数据
+    document.getElementById('export-data').addEventListener('click', function() {
+        const dataStr = JSON.stringify(bookmarksData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'bookmarks-export.json';
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+    });
+    
+    // 导入数据
+    document.getElementById('import-data').addEventListener('click', function() {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.json';
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    Swal.fire({
+                        title: '确认导入?',
+                        text: '这将覆盖当前所有书签数据，是否继续?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: '导入'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            bookmarksData = importedData;
+                            updateCategoryDropdowns();
+                            updateBookmarkDropdowns();
+                            renderBookmarks();
+                            saveToLocalStorage();
+                            Swal.fire('导入成功', '书签数据已更新', 'success');
+                        }
+                    });
+                } catch (err) {
+                    Swal.fire('导入失败', '文件格式不正确', 'error');
+                }
+            };
+            reader.readAsText(file);
+        });
+        
+        fileInput.click();
+    });
+    
+    // 保存到GitHub (需要配置GitHub API)
+    document.getElementById('save-changes').addEventListener('click', function() {
+        Swal.fire({
+            title: '保存到GitHub',
+            text: '此功能需要配置GitHub API，请查看源代码了解如何设置',
+            icon: 'info'
+        });
+    });
+    
+    // 从GitHub加载 (需要配置GitHub API)
+    document.getElementById('load-from-github').addEventListener('click', function() {
+        Swal.fire({
+            title: '从GitHub加载',
+            text: '此功能需要配置GitHub API，请查看源代码了解如何设置',
+            icon: 'info'
+        });
+    });
+}
+
+// 更新分类下拉列表
+function updateCategoryDropdowns() {
+    const categoryList = document.getElementById('category-list');
+    const bookmarkCategory = document.getElementById('bookmark-category');
+    
+    categoryList.innerHTML = '';
+    bookmarkCategory.innerHTML = '';
+    
+    for (const category in bookmarksData) {
+        const option1 = document.createElement('option');
+        option1.value = category;
+        option1.textContent = category;
+        categoryList.appendChild(option1);
+        
+        const option2 = document.createElement('option');
+        option2.value = category;
+        option2.textContent = category;
+        bookmarkCategory.appendChild(option2);
+    }
+}
+
+// 更新书签下拉列表
+function updateBookmarkDropdowns() {
+    const editBookmarkList = document.getElementById('edit-bookmark-list');
+    editBookmarkList.innerHTML = '<option value="">选择书签...</option>';
+    
+    for (const category in bookmarksData) {
+        // 主分类下的书签
+        if (bookmarksData[category].links) {
+            bookmarksData[category].links.forEach((bookmark, index) => {
+                const option = document.createElement('option');
+                option.value = `${category}|root|${index}`;
+                option.textContent = `${category} > ${bookmark.name}`;
+                editBookmarkList.appendChild(option);
+            });
+        }
+        
+        // 子分类下的书签
+        for (const subcategory in bookmarksData[category]) {
+            if (subcategory !== 'links' && bookmarksData[category][subcategory].links) {
+                bookmarksData[category][subcategory].links.forEach((bookmark, index) => {
+                    const option = document.createElement('option');
+                    option.value = `${category}|${subcategory}|${index}`;
+                    option.textContent = `${category} > ${subcategory} > ${bookmark.name}`;
+                    editBookmarkList.appendChild(option);
+                });
+            }
+        }
+    }
+}
+
+// 保存到localStorage
+function saveToLocalStorage() {
+    localStorage.setItem('bookmarksData', JSON.stringify(bookmarksData));
+}
+
+// 手风琴菜单功能
+function setupAccordion() {
+    const headers = ["H1", "H2", "H3", "H4", "H5", "H6"];
+
+    document.querySelector(".accordion").addEventListener("click", function(e) {
+        const target = e.target,
+              name = target.nodeName.toUpperCase();
+
+        if (headers.includes(name)) {
+            const subItem = target.nextElementSibling;
+            let depth = 0, parent = subItem.parentElement;
+            while (parent !== this) { depth++; parent = parent.parentElement; }
+            Array.from(this.querySelectorAll(".accordion p, .accordion div")).forEach(el => {
+                let elDepth = 0, elParent = el.parentElement;
+                while (elParent !== this) { elDepth++; elParent = elParent.parentElement; }
+                if (elDepth >= depth && el !== subItem) el.style.display = "none";
+            });
+            subItem.style.display = (subItem.style.display === "block") ? "none" : "block";
+            if (subItem.style.display === "block") {
+                const visibleElements = Array.from(this.querySelectorAll(".accordion :visible"));
+                if (visibleElements.length) visibleElements[visibleElements.length - 1].style.borderRadius = "0 0 10px 10px";
+            }
+            target.style.borderBottomRightRadius = target.style.borderBottomLeftRadius = "0";
+        }
+    });
+}
+
+// 点击复制功能
+copy = (event) => {
+    let innerText = event.target.innerText;
+    var tmpInput = document.createElement("input");
+    document.body.appendChild(tmpInput);
+    tmpInput.value = innerText;
+    tmpInput.select();
+    document.execCommand("cut"); 
+    tmpInput.remove();
+    Swal.fire({
+        position: 'top-end',
+        icon: 'success',
+        title: '已复制到剪贴板',
+        showConfirmButton: false,
+        timer: 1500
+    });
+}
+
+// 加速title显示
+(function() {
+    const tip = Object.assign(document.createElement('div'), {
+        id: 'tip-div',
+        style: `display:none;color:#000;background:#f3f3f3;border:1px solid #ccc;
+                font:12px/16px sans-serif;padding:5px;position:absolute;
+                z-index:2000;pointer-events:none;max-width:300px;`
+    });
+    document.body.appendChild(tip);
+
+    document.onmousemove = e => {
+        const t = e.target;
+        const title = t.title || t.getAttribute('_title');
+        
+        if (!title) return tip.style.display = 'none';
+        
+        if (t.title) {
+            t.setAttribute('_title', t.title);
+            t.removeAttribute('title');
+        }
+        
+        if (tip.textContent !== title) tip.textContent = title;
+        
+        tip.style.display = 'block';
+        const x = Math.min(e.pageX + 10, innerWidth - tip.offsetWidth - 5);
+        const y = Math.min(e.pageY + 10, innerHeight - tip.offsetHeight - 5);
+        tip.style.left = x + 'px';
+        tip.style.top = y + 'px';
+    };
+})();
+</script>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-size: 100%;
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f5f5f5;
+    }
+    
+    .accordion {
+        max-width: 720px;
+        margin: 20px auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .accordion h1, h2, h3, h4 {
+        cursor: pointer;
+    }
+    
+    .accordion h2, .accordion h3, .accordion h4 {
+        font-family: "News Cycle";
+    }
+    
+    .accordion h1 {
+        padding: 15px 30px;
+        background-color: #333;
+        font-family: Lobster;
+        font-size: 1.6rem;
+        font-weight: normal;
+        border-bottom: 1px solid #ddd;
+        color: #bbb;
+    }
+    
+    .accordion h1:hover {
+        color: #fff;
+    }
+    
+    .accordion h2 {
+        padding: 12px 30px;
+        background-color: #ddd;
+        border-bottom: 1px solid #bbb;
+        font-size: 1.4rem;
+        color: #333;
+        position: sticky;
+        top: 0;
+    }
+    
+    .accordion h2:hover {
+        background-color: #99d3fd;
+        color: #b94152;
+    }
+    
+    .accordion h3 {
+        padding: 10px 30px;
+        background-color: #b94152;
+        font-size: 1rem;
+        border-bottom: 1px solid #ddd;
+        color: #ddd;
+    }
+    
+    .accordion h3:hover {
+        background-color: #99d3fd;
+        color: #b94152;
+    }
+    
+    .accordion h4 {
+        padding: 10px 30px;
+        background-color: #ffc25a;
+        font-size: 1rem;
+        border-bottom: 1px solid #ddd;
+        color: #b94152;
+    }
+    
+    .accordion h4:hover {
+        background-color: #99d3fd;
+        color: #b94152;
+    }
+    
+    .accordion h5 {
+        padding: 1px;
+        background-color: #b94152;
+    }
+    
+    .accordion a {
+        display: block;
+        padding: 10px 46px;
+        text-decoration: none;
+        color: #333;
+        background-color: #f8f8f8;
+        border-bottom: 1px solid #ddd;
+        transition: all 0.3s ease;
+    }
+    
+    .accordion a:hover {
+        background-color: #99d3fd;
+        border-bottom: 1px solid #bbb;
+        font-size: 1.1rem;
+        color: #b94152;
+        padding-left: 50px;
+    }
+    
+    .wenben {
+        width: 90%;
+        margin: 10px auto;
+        padding: 10px;
+    }
+    
+    .accordion span {
+        line-height: 20px;
+        padding: 8px 15px;
+        text-decoration: none;
+        color: #333;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        display: inline-block;
+        white-space: nowrap;
+        width: 200px;
+        overflow: hidden;
+        margin: 5px;
+        cursor: pointer;
+    }
+    
+    .accordion span:hover {
+        background-color: #99d3fd;
+    }
+    
+    .accordion span:hover::before {
+        content: "⿻";
+        font-size: 1rem;
+        color: #b94152;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 2px 5px;
+        margin-left: 175px;
+        margin-top: -3px;
+        border-radius: 5px;
+        position: absolute;
+    }
+    
+    .accordion span:active {
+        background-color: red;
+    }
+    
+    .accordion span:active:before {
+        content: "✔";
+        font-size: 1rem;
+        color: #b94152;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 2px 7px;
+        margin-left: 175px;
+        margin-top: -3px;
+        border-radius: 5px;
+        position: absolute;
+    }
+    
+    /* 管理面板样式 */
+    .h1 {
+        max-width: 720px;
+        margin: 20px auto;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        padding: 15px;
+    }
+    
+    #toggle-management {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 5px;
+        width: 100%;
+    }
+    
+    #toggle-management:hover {
+        background-color: #45a049;
+    }
+    
+    .management-content {
+        margin-top: 15px;
+        padding: 15px;
+        border-top: 1px solid #eee;
+    }
+    
+    .management-section {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .management-section h3 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .management-section input, 
+    .management-section select {
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
+    }
+    
+    .management-section button {
+        background-color: #008CBA;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        margin: 5px 0;
+        cursor: pointer;
+        border-radius: 4px;
+        width: 100%;
+    }
+    
+    .management-section button:hover {
+        background-color: #007B9E;
+    }
+    
+    /* 响应式设计 */
+    @media (min-width: 768px) {
+        .management-section div {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .management-section input, 
+        .management-section select {
+            flex: 1;
+        }
+        
+        .management-section button {
+            width: auto;
+        }
+    }
+</style>
+</body>
+</html>
